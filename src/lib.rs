@@ -65,4 +65,15 @@ mod tests {
 
         assert_eq!(Scalar::from(12), a + b + c + d + e + f + g + h)
     }
+
+    #[test]
+    fn s1_test() {
+        let s1 = Polynomial::<Scalar>::s1();
+        println!("{:?}", s1);
+        let s10 = s1.evaluate(0);
+        let s11 = s1.evaluate(1);
+        println!("{:?} {:?}", s10, s11);
+
+        assert_eq!(Scalar::from(12), s10 + s11)
+    }
 }
