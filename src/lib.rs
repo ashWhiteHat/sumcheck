@@ -1,3 +1,6 @@
+mod univariate_polynomial;
+
+use univariate_polynomial::UnivariatePolynomial;
 use zkstd::common::PrimeField;
 
 // example polynomial of Justin Thaler's
@@ -24,6 +27,23 @@ impl<F: PrimeField> Polynomial<F> {
         let x1x3 = self.x_1 * self.x_3;
         let x2x3 = self.x_2 * self.x_3;
         xxx21 + x1x3 + x2x3
+    }
+
+    fn s1() -> UnivariatePolynomial<F> {
+        let mut coeffs = vec![0; 4];
+        // x1, 0, 0
+        coeffs[3] += 2;
+        // x1, 0, 1
+        coeffs[3] += 2;
+        coeffs[1] += 1;
+        // x1, 1, 0
+        coeffs[3] += 2;
+        // x1, 1, 1
+        coeffs[3] += 2;
+        coeffs[1] += 1;
+        coeffs[0] += 1;
+
+        UnivariatePolynomial::new(coeffs.iter().map(|coeff| F::from(*coeff)).collect())
     }
 }
 
