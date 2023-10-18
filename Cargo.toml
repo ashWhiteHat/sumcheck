@@ -3,6 +3,8 @@ name = "sumcheck"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+zkstd = { version = "0.0.21", default-features = false }
+
+[dev-dependencies]
+jub-jub = { version = "0.0.18", default-features = false }
