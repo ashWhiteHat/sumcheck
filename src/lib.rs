@@ -45,6 +45,18 @@ impl<F: PrimeField> Polynomial<F> {
 
         UnivariatePolynomial::new(coeffs.iter().map(|coeff| F::from(*coeff)).collect())
     }
+
+    fn s2(r1: u64) -> UnivariatePolynomial<F> {
+        let mut coeffs = vec![0; 2];
+        // r1, x2, 0
+        coeffs[0] += 2 * (r1 * r1 * r1);
+        // r1, x2, 1
+        coeffs[0] += 2 * (r1 * r1 * r1);
+        coeffs[0] += r1;
+        coeffs[1] += 1;
+
+        UnivariatePolynomial::new(coeffs.iter().map(|coeff| F::from(*coeff)).collect())
+    }
 }
 
 #[cfg(test)]
@@ -69,11 +81,20 @@ mod tests {
     #[test]
     fn s1_test() {
         let s1 = Polynomial::<Scalar>::s1();
-        println!("{:?}", s1);
         let s10 = s1.evaluate(0);
         let s11 = s1.evaluate(1);
-        println!("{:?} {:?}", s10, s11);
 
         assert_eq!(Scalar::from(12), s10 + s11)
+    }
+
+    #[test]
+    fn s2_test() {
+        let r1 = 2;
+        let s1 = Polynomial::<Scalar>::s1();
+        let s2 = Polynomial::<Scalar>::s2(r1);
+        let s20 = s2.evaluate(0);
+        let s21 = s2.evaluate(1);
+
+        assert_eq!(s20 + s21, s1.evaluate(r1))
     }
 }
