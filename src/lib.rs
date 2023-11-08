@@ -3,16 +3,14 @@ mod univariate_polynomial;
 use univariate_polynomial::UnivariatePolynomial;
 use zkstd::common::PrimeField;
 
-// example polynomial of Justin Thaler's
-// https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf#page=37&zoom=100,100,250
-struct Polynomial<F: PrimeField> {
+pub struct Polynomial<F: PrimeField> {
     x_1: F,
     x_2: F,
     x_3: F,
 }
 
 impl<F: PrimeField> Polynomial<F> {
-    fn new(x_1: u64, x_2: u64, x_3: u64) -> Self {
+    pub fn new(x_1: u64, x_2: u64, x_3: u64) -> Self {
         Self {
             x_1: F::from(x_1),
             x_2: F::from(x_2),
@@ -21,7 +19,7 @@ impl<F: PrimeField> Polynomial<F> {
     }
 
     // 2X^3_1 + X_1X_3 + X_2X_3
-    fn evaluate(&self) -> F {
+    pub fn evaluate(&self) -> F {
         let xxx1 = self.x_1.square() * self.x_1;
         let xxx21 = xxx1.double();
         let x1x3 = self.x_1 * self.x_3;
@@ -29,7 +27,7 @@ impl<F: PrimeField> Polynomial<F> {
         xxx21 + x1x3 + x2x3
     }
 
-    fn s1() -> UnivariatePolynomial<F> {
+    pub fn s1() -> UnivariatePolynomial<F> {
         let mut coeffs = vec![0; 4];
         // x1, 0, 0
         coeffs[3] += 2;
@@ -46,7 +44,7 @@ impl<F: PrimeField> Polynomial<F> {
         UnivariatePolynomial::new(coeffs.iter().map(|coeff| F::from(*coeff)).collect())
     }
 
-    fn s2(r1: u64) -> UnivariatePolynomial<F> {
+    pub fn s2(r1: u64) -> UnivariatePolynomial<F> {
         let mut coeffs = vec![0; 2];
         // r1, x2, 0
         coeffs[0] += 2 * (r1 * r1 * r1);
@@ -57,6 +55,16 @@ impl<F: PrimeField> Polynomial<F> {
 
         UnivariatePolynomial::new(coeffs.iter().map(|coeff| F::from(*coeff)).collect())
     }
+
+    pub fn s3(r1: u64, r2: u64) -> UnivariatePolynomial<F> {
+        let mut coeffs = vec![0; 2];
+        // r1, r2, x3
+        coeffs[0] += 2 * (r1 * r1 * r1);
+        coeffs[1] += r1;
+        coeffs[1] += r2;
+
+        UnivariatePolynomial::new(coeffs.iter().map(|coeff| F::from(*coeff)).collect())
+    }
 }
 
 #[cfg(test)]
@@ -64,6 +72,8 @@ mod tests {
     use super::*;
     use jub_jub::Fr as Scalar;
 
+    // example value from following
+    // https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf#page=37&zoom=100,100,250
     #[test]
     fn h_test() {
         let a = Polynomial::<Scalar>::new(0, 0, 0).evaluate();
@@ -96,5 +106,17 @@ mod tests {
         let s21 = s2.evaluate(1);
 
         assert_eq!(s20 + s21, s1.evaluate(r1))
+    }
+
+    #[test]
+    fn s3_test() {
+        let r1 = 2;
+        let r2 = 3;
+        let s2 = Polynomial::<Scalar>::s2(r1);
+        let s3 = Polynomial::<Scalar>::s3(r1, r2);
+        let s30 = s3.evaluate(0);
+        let s31 = s3.evaluate(1);
+
+        assert_eq!(s30 + s31, s2.evaluate(r2))
     }
 }
